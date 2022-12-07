@@ -3,7 +3,7 @@
 5-stage pipelined RISC-V RV32I base instruction set. Verilog implementation.
 
 ## Environment
-+ Cyclone IV FPGA
++ Cyclone V FPGA
 + Instruction/Data Memory use embedded 1-PORT RAM.
 
 ## Architecture style
