@@ -444,3 +444,5 @@ module ALU_controller(ALUOp,Funct7, Funct3,  ALUcontrol4bit,LUIsignal);
 	if(LUIsignal) ALUcontrol4bit <= 5'b00010; //lui , auipc
 	end
 endmodule
+
+
