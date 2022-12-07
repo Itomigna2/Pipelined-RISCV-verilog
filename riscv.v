@@ -136,7 +136,7 @@
 		EXMEM_JALSIGNAL <=2'b00;		
 		end
 		else begin	
-		EXMEM_ADDSUM_OUTPUT <= (IDEX_JALSIGNAL[1] ? IDEX_READDATA1 : IDEX_PC)+IDEX_IMMGEN;	//AddSum //jal, jalr	
+		EXMEM_ADDSUM_OUTPUT <= (IDEX_JALSIGNAL[1] ? IDEX_READDATA1 : IDEX_PC)+IDEX_IMMGEN; //AddSum //jal, jalr	
 		EXMEM_ZERO <= Zero;
 		EXMEM_ALURESULT <= IDEX_JALSIGNAL ? (IDEX_PC+4) : ALUresult;//jal,jalr
 		EXMEM_READDATA2<=ALUinput2;
@@ -167,7 +167,7 @@
 		MEMWB_MEMTOREG <= EXMEM_MEMTOREG;
 	end	
 	
-	//Program Counter   with   PCSrc(branch) MUX   	
+	//Program Counter with PCSrc(branch) MUX   	
 	always @(posedge clk) begin		
 		if(PCWRITEOFF == 0) begin		
 		if((EXMEM_ZERO & EXMEM_BRANCH) || EXMEM_JALSIGNAL)
@@ -178,7 +178,7 @@
 	initial PC=-4;	
 	
 	////Instruction Memory
-	instRAM ({{2'b0},{PC[31:2]}},	!clk , 0 ,	0,  qinstruction);	
+	instRAM ({{2'b0},{PC[31:2]}}, !clk , 0,	0, qinstruction);	
 	////Controller	
 	controller(IFID_QINSTRUCTION[6:0],ALUSrc,MemtoReg,RegWriteEnable,MemRead,MemWrite,branch,ALUOp1,ALUOp0,Signal8bit,LUIsignal,JALsignal);
 	ALU_controller(IDEX_ALUOP, IDEX_FUNCT7, IDEX_FUNCT3,  ALUcontrol4bit,IDEX_LUISIGNAL);
@@ -186,7 +186,7 @@
 	////Register Write  with memtoreg mux //Write Back  
 	always @(negedge clk) begin	
     	toReg = (MEMWB_MEMTOREG ? MEMWB_DMOUTPUT : MEMWB_ALURESULT);
-		if(MEMWB_REGWRITE==1) Register[MEMWB_RD] =  toReg;
+		if(MEMWB_REGWRITE==1) Register[MEMWB_RD] = toReg;
 		Register[0]=0;
 	end	
 
@@ -222,7 +222,7 @@
 	
 	temp = {{EXMEM_ALUOP}, {EXMEM_FUNCT3}};
 		case (temp)
-		12'b00000 : begin SignExtensionSelect=3'b000; ByteEnable = 4'b0001; end // lb     //signed extension b,h,w select          
+		12'b00000 : begin SignExtensionSelect=3'b000; ByteEnable = 4'b0001; end // lb  //signed extension b,h,w select          
 		12'b00001 : begin SignExtensionSelect=3'b001; ByteEnable = 4'b0011; end // lh 
 		12'b00010 : begin SignExtensionSelect=3'b010; ByteEnable = 4'b1111; end// lw   
 		12'b00100 : begin SignExtensionSelect=3'b100; ByteEnable = 4'b0001; end // lbu
@@ -287,7 +287,7 @@ module forwarding ( IDEX_RS1,IDEX_RS2, EXMEM_REGWRITE, MEMWB_REGWRITE, EXMEM_RD,
 	reg  [1:0] FORWARD_A,FORWARD_B;
 	output [1:0] FORWARD_A,FORWARD_B;		
 	
-	always  @*    begin		
+	always  @*  begin		
 		if (EXMEM_REGWRITE && (EXMEM_RD != 0) && (EXMEM_RD == IDEX_RS1)) FORWARD_A <= 2'b10;
 		else					
 		if (MEMWB_REGWRITE && (MEMWB_RD != 0) && (MEMWB_RD == IDEX_RS1)
@@ -309,10 +309,10 @@ module IMMGEN(qinstruction, IMMGEN);
 	reg [31:0] IMMGEN;	
 	always @* begin
 		case(qinstruction[6:0])
-			7'b0000011 : IMMGEN<={ {20{qinstruction[31]}},qinstruction[31:20] };  	//LOAD
-			7'b0010011 : IMMGEN<={ {20{qinstruction[31]}},qinstruction[31:20] };  	//OP-IMM
-			7'b0100011 : IMMGEN<={ {20{qinstruction[31]}},qinstruction[31:25],qinstruction[11:7] }; 	//STORE			
-			7'b1100011 : IMMGEN<={ {20{qinstruction[31]}},qinstruction[7],qinstruction[30:25],qinstruction[11:8],1'b0 };   //BRANCH			
+			7'b0000011 : IMMGEN<={ {20{qinstruction[31]}},qinstruction[31:20] }; //LOAD
+			7'b0010011 : IMMGEN<={ {20{qinstruction[31]}},qinstruction[31:20] }; //OP-IMM
+			7'b0100011 : IMMGEN<={ {20{qinstruction[31]}},qinstruction[31:25],qinstruction[11:7] }; //STORE			
+			7'b1100011 : IMMGEN<={ {20{qinstruction[31]}},qinstruction[7],qinstruction[30:25],qinstruction[11:8],1'b0 }; //BRANCH			
 			7'b0110111 : IMMGEN<={ qinstruction[31:12],{12{1'b0}} };//LUI 
 			7'b0010111 : IMMGEN<={ qinstruction[31:12],{12{1'b0}} };//AUIPC
 			7'b1101111 : IMMGEN<={ {12{qinstruction[31]}},qinstruction[19:12],qinstruction[20],qinstruction[30:21],1'b0 }; // JAL
@@ -351,13 +351,13 @@ module controller(opcode,ALUsrc,MemtoReg,RegWrite,MemRead,MemWrite,Branch,ALUOp1
 		LUIsignal = 2'b00;
 		JALsignal = 2'b00;
 		case(opcode)
-			7'b0110011 : Signal8bit=8'b00100010;   //OP
-			7'b0000011 : Signal8bit=8'b11110000;  	//LOAD
-			7'b0100011 : Signal8bit=8'b10001000; 	//STORE			
-			7'b1100011 : Signal8bit=8'b00000101;   //BRANCH
+			7'b0110011 : Signal8bit=8'b00100010; //OP
+			7'b0000011 : Signal8bit=8'b11110000; //LOAD
+			7'b0100011 : Signal8bit=8'b10001000; //STORE			
+			7'b1100011 : Signal8bit=8'b00000101; //BRANCH
 			7'b0010011 : Signal8bit=8'b10100011; //OP-IMM 			
 			7'b0110111 : begin Signal8bit=8'b10100010; LUIsignal = 2'b01; end //LUI
-			7'b0010111 : begin Signal8bit=8'b10100010; LUIsignal = 2'b10; end  //AUIPC
+			7'b0010111 : begin Signal8bit=8'b10100010; LUIsignal = 2'b10; end //AUIPC
 			7'b1101111 : begin Signal8bit=8'b00100000; JALsignal = 2'b01; end //JAL 
 			7'b1100111 : begin Signal8bit=8'b00100000; JALsignal = 2'b10; end //JALR						
 			default : Signal8bit=8'b00000000;  
@@ -395,7 +395,7 @@ module ALU(readData1, fromMUX, Result, aluControl4bit,Zero);
 		4'b00100 : if(readData1 != fromMUX) Zero <= 1; //bne
 		4'b00101 : if($signed(readData1) < $signed(fromMUX)) Zero <= 1;	 //blt
 		4'b00110 : if($signed(readData1) >= $signed(fromMUX)) Zero <= 1; //bge
-	        4'b00111 : if(readData1 < fromMUX) Zero <= 1;	 //bltu
+		4'b00111 : if(readData1 < fromMUX) Zero <= 1; //bltu
 		4'b01110 : if(readData1 >= fromMUX) Zero <= 1; //bgeu		
 		4'b01001 : Result <= readData1<<fromMUX[4:0]; //slli,sll  
 		4'b01010 : Result <= readData1>>fromMUX[4:0]; //srli ,srl
