@@ -13,7 +13,7 @@
 	reg [31:0] PC;
 	reg [31:0] toALU;
 	reg [31:0] Register [0:31]; 
-    reg [31:0] DMdataOutputExtended;		
+        reg [31:0] DMdataOutputExtended;		
 	
 	////IFID PIPELINE REGISTER////
 	reg [31:0] IFID_PC;
@@ -41,13 +41,13 @@
 	reg [4:0] IDEX_RS1;
 	reg [4:0] IDEX_RS2;
 	reg IDEX_REGWRITE;
-	reg	IDEX_MEMTOREG;
-	reg	IDEX_BRANCH;
-	reg	IDEX_MEMREAD;
-	reg	IDEX_MEMWRITE;
+	reg IDEX_MEMTOREG;
+	reg IDEX_BRANCH;
+	reg IDEX_MEMREAD;
+	reg IDEX_MEMWRITE;
 	reg [1:0]IDEX_ALUOP;
-	reg	IDEX_ALUSRC;
-    reg [1:0]IDEX_LUISIGNAL;
+	reg IDEX_ALUSRC;
+        reg [1:0]IDEX_LUISIGNAL;
 	reg [1:0]IDEX_JALSIGNAL;		
 	always @(posedge clk) begin
 		if((EXMEM_ZERO & EXMEM_BRANCH) || EXMEM_JALSIGNAL) begin
@@ -111,12 +111,12 @@
 	reg [31:0] EXMEM_ALURESULT;
 	reg [31:0] EXMEM_READDATA2;
 	reg [31:0] EXMEM_RD;
-	reg   EXMEM_REGWRITE;
-	reg	EXMEM_MEMTOREG;
-	reg	EXMEM_BRANCH;
-	reg	EXMEM_MEMREAD;
-	reg	EXMEM_MEMWRITE;	
-	reg  [1:0] EXMEM_JALSIGNAL;	
+	reg EXMEM_REGWRITE;
+	reg EXMEM_MEMTOREG;
+	reg EXMEM_BRANCH;
+	reg EXMEM_MEMREAD;
+	reg EXMEM_MEMWRITE;	
+	reg [1:0] EXMEM_JALSIGNAL;	
 	reg [2:0] EXMEM_FUNCT3;
 	reg [1:0] EXMEM_ALUOP;
 	always @(posedge clk) begin
@@ -168,8 +168,7 @@
 	end	
 	
 	//Program Counter   with   PCSrc(branch) MUX   	
-	always @(posedge clk) begin
-		
+	always @(posedge clk) begin		
 		if(PCWRITEOFF == 0) begin		
 		if((EXMEM_ZERO & EXMEM_BRANCH) || EXMEM_JALSIGNAL)
 				PC <= EXMEM_ADDSUM_OUTPUT;		
@@ -203,7 +202,7 @@
 	end
 
 	//Data Memory	
-	RAM ({{2'b0},{EXMEM_ALURESULT[31:2]}}, ByteEnable,	!clk , EXMEM_READDATA2 ,	EXMEM_MEMWRITE,  DMdataOutput);	
+	RAM ({{2'b0},{EXMEM_ALURESULT[31:2]}}, ByteEnable,!clk , EXMEM_READDATA2 ,  EXMEM_MEMWRITE,  DMdataOutput);	
 
 	//loaded data decoding
 	always @* begin
@@ -279,7 +278,7 @@ module hazarddetect(IDEX_MEMREAD,IDEX_RD,IFID_RS1,IFID_RS2,TOCONTROLBITMUX,IFIDW
 		IFIDWRITEOFF<=0;
 		PCWRITEOFF<=0;		
 		end
-   end
+         end
 endmodule
 
 module forwarding ( IDEX_RS1,IDEX_RS2, EXMEM_REGWRITE, MEMWB_REGWRITE, EXMEM_RD, MEMWB_RD, FORWARD_A,FORWARD_B);	 
@@ -390,13 +389,13 @@ module ALU(readData1, fromMUX, Result, aluControl4bit,Zero);
 		4'b00010 : Result <= readData1+fromMUX; //add,addi,load,store
 		4'b00011 : Result <= readData1^fromMUX; //xor ,xori		
 		4'b00110 : begin                        //sub, beq
-					 Result = readData1-fromMUX;
-					 if(Result==0) Zero <= 1;					 
-					 end
+			   Result = readData1-fromMUX;
+			   if(Result==0) Zero <= 1;					 
+			   end
 		4'b00100 : if(readData1 != fromMUX) Zero <= 1; //bne
 		4'b00101 : if($signed(readData1) < $signed(fromMUX)) Zero <= 1;	 //blt
 		4'b00110 : if($signed(readData1) >= $signed(fromMUX)) Zero <= 1; //bge
-	    4'b00111 : if(readData1 < fromMUX) Zero <= 1;	 //bltu
+	        4'b00111 : if(readData1 < fromMUX) Zero <= 1;	 //bltu
 		4'b01110 : if(readData1 >= fromMUX) Zero <= 1; //bgeu		
 		4'b01001 : Result <= readData1<<fromMUX[4:0]; //slli,sll  
 		4'b01010 : Result <= readData1>>fromMUX[4:0]; //srli ,srl
@@ -435,9 +434,9 @@ module ALU_controller(ALUOp,Funct7, Funct3,  ALUcontrol4bit,LUIsignal);
 		6'b1xx111 : ALUcontrol4bit <= 5'b00000; //and, andi
 		6'b1x0001 : ALUcontrol4bit <= 5'b01001; //sll,slli  
 		6'b1x0101 : ALUcontrol4bit <= 5'b01010; //srl, srli	
-	    6'b1x1101 : ALUcontrol4bit <= 5'b01011; //sra, srai
+	        6'b1x1101 : ALUcontrol4bit <= 5'b01011; //sra, srai
 		6'b100000 : ALUcontrol4bit <= 5'b00010;	//add
-	    6'b101000 : ALUcontrol4bit <= 5'b00110; //sub	
+	        6'b101000 : ALUcontrol4bit <= 5'b00110; //sub	
 		6'b11x000 : ALUcontrol4bit <= 5'b00010;	//addi
 		default : ALUcontrol4bit <= 5'b11111;
 	endcase
